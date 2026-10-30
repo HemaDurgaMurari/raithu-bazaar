@@ -12,8 +12,6 @@ services:
         value: openrouter
       - key: OPENROUTER_MODEL
         value: openrouter/free
-      - key: OPENROUTER_API_KEY
-        sync: false
       - key: DATABASE_URL
         sync: false
       - key: DATABASE_USERNAME
