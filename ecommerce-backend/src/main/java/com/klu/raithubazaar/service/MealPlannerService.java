@@ -1,6 +1,6 @@
 package com.klu.raithubazaar.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import com.klu.raithubazaar.dto.MealPlanRequest;
 import com.klu.raithubazaar.dto.MealPlanResponse;
@@ -73,17 +73,17 @@ public class MealPlannerService {
             JsonNode rows = plan.path("ingredients");
             if (rows.isArray()) {
                 for (JsonNode row : rows) {
-                    String name = row.path("name").asString("").trim();
+                    String name = textValue(row.path("name"), "").trim();
                     if (name.isBlank() || name.length() > 80) continue;
-                    String quantity = row.path("quantity").asString("As needed");
-                    String note = row.path("note").asString("");
+                    String quantity = textValue(row.path("quantity"), "As needed");
+                    String note = textValue(row.path("note"), "");
                     List<MealPlanResponse.ProductMatch> matches = findMatches(name);
                     ingredients.add(new MealPlanResponse.Ingredient(name, quantity, note, matches));
                     if (ingredients.size() == 15) break;
                 }
             }
             return new MealPlanResponse(request.dish().trim(), servings,
-                    plan.path("note").asString("Suggested vegetables for your dish."), ingredients);
+                    textValue(plan.path("note"), "Suggested vegetables for your dish."), ingredients);
         } catch (ResourceAccessException e) {
             String message = "openrouter".equalsIgnoreCase(provider)
                     ? "The hosted AI service is temporarily unavailable. Please try again shortly."
@@ -109,7 +109,7 @@ public class MealPlannerService {
                 .body(mapper.createObjectNode().put("model", ollamaModel).put("system", system)
                         .put("prompt", prompt).put("format", "json").put("stream", false).put("think", false))
                 .retrieve().body(JsonNode.class);
-        return response == null ? "" : response.path("response").asString("");
+        return response == null ? "" : textValue(response.path("response"), "");
     }
 
     private String generateWithOpenRouter(String system, String prompt) {
@@ -135,11 +135,17 @@ public class MealPlannerService {
         if (content != null && content.isArray()) {
             StringBuilder text = new StringBuilder();
             for (JsonNode part : content) {
-                if (part.hasNonNull("text")) text.append(part.path("text").asString());
+                if (part.hasNonNull("text")) text.append(textValue(part.path("text"), ""));
             }
             return text.toString();
         }
         return "";
+    }
+
+    private String textValue(JsonNode node, String fallback) {
+        if (node == null || node.isNull() || node.isMissingNode()) return fallback;
+        String value = node.asString();
+        return value == null ? fallback : value;
     }
 
     private List<MealPlanResponse.ProductMatch> findMatches(String ingredient) {
