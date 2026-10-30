@@ -1,0 +1,36 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "backend: compile",
+      "type": "process",
+      "command": "${workspaceFolder}/ecommerce-backend/mvnw.cmd",
+      "args": [
+        "-DskipTests",
+        "compile"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/ecommerce-backend"
+      },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "backend: run",
+      "type": "process",
+      "command": "${workspaceFolder}/ecommerce-backend/mvnw.cmd",
+      "args": [
+        "spring-boot:run"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/ecommerce-backend"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    }
+  ]
+}

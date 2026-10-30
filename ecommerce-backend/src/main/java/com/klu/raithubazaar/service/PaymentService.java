@@ -20,6 +20,8 @@ import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.springframework.context.ApplicationEventPublisher;
+import com.klu.raithubazaar.notification.OrderConfirmationEmailEvent;
 
 @Service
 public class PaymentService {
@@ -30,12 +32,14 @@ public class PaymentService {
     private final String keyId;
     private final String keySecret;
     private final String webhookSecret;
+    private final ApplicationEventPublisher events;
 
     public PaymentService(OrderRepository orders, PaymentRepository payments, BackgroundJobService jobs,
                           JsonMapper objectMapper,
                           @Value("${app.payment.razorpay-key-id}") String keyId,
                           @Value("${app.payment.razorpay-key-secret}") String keySecret,
-                          @Value("${app.payment.webhook-secret}") String webhookSecret) {
+                          @Value("${app.payment.webhook-secret}") String webhookSecret,
+                          ApplicationEventPublisher events) {
         this.orders = orders;
         this.payments = payments;
         this.jobs = jobs;
@@ -43,6 +47,7 @@ public class PaymentService {
         this.keyId = keyId;
         this.keySecret = keySecret;
         this.webhookSecret = webhookSecret;
+        this.events = events;
     }
 
     @Transactional
@@ -122,10 +127,10 @@ public class PaymentService {
         }
         try {
             JsonNode root = objectMapper.readTree(payload);
-            if (!"payment.captured".equals(root.path("event").asText())) return;
+            if (!"payment.captured".equals(root.path("event").asString())) return;
             JsonNode entity = root.path("payload").path("payment").path("entity");
-            String razorpayOrderId = entity.path("order_id").asText();
-            String paymentId = entity.path("id").asText();
+            String razorpayOrderId = entity.path("order_id").asString();
+            String paymentId = entity.path("id").asString();
             Payment payment = payments.findByRazorpayOrderId(razorpayOrderId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment order not found"));
             confirm(payment, paymentId, "webhook-verified");
@@ -147,6 +152,7 @@ public class PaymentService {
         payment.getOrder().setStatus("PAID");
         payments.save(payment);
         orders.save(payment.getOrder());
+        events.publishEvent(new OrderConfirmationEmailEvent(payment.getOrder().getOrderId()));
         jobs.queueForOrder(payment.getOrder().getOrderId());
     }
 

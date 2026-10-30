@@ -10,19 +10,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.transaction.annotation.Transactional;
+import com.klu.raithubazaar.notification.WelcomeEmailEvent;
 
 @Service
 public class AuthService {
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final ApplicationEventPublisher events;
 
-    public AuthService(UserRepository users, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(UserRepository users, PasswordEncoder passwordEncoder, JwtService jwtService,
+                       ApplicationEventPublisher events) {
         this.users = users;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.events = events;
     }
 
+    @Transactional
     public AuthResponse register(AuthRequest request, Role role) {
         if (request.name() == null || request.name().isBlank()
                 || request.email() == null || !request.email().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")
@@ -34,8 +42,15 @@ public class AuthService {
         if (users.existsByEmailIgnoreCase(email)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "An account already exists for this email");
         }
-        User saved = users.save(new User(request.name().trim(), email,
-                passwordEncoder.encode(request.password()), role));
+        User saved;
+        try {
+            saved = users.saveAndFlush(new User(request.name().trim(), email,
+                    passwordEncoder.encode(request.password()), role));
+        } catch (DataIntegrityViolationException exception) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "An account already exists for this email");
+        }
+        events.publishEvent(new WelcomeEmailEvent(saved.getUserId(), saved.getEmail(), saved.getName()));
         return response(saved);
     }
 

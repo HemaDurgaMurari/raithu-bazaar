@@ -20,8 +20,14 @@ export function CheckoutForm({ onBack, onRequireSignIn, onSuccess }: CheckoutFor
   const [notice, setNotice] = useState("");
   const [paying, setPaying] = useState(false);
   const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
+  const [scheduled, setScheduled] = useState(false);
+  const [scheduledFor, setScheduledFor] = useState("");
   const paymentFailed = useRef(false);
   const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const deliveryCharge = 49;
+  const carryingCharge = 2;
+  const gst = total * 0.05;
+  const grandTotal = total + deliveryCharge + carryingCharge + gst;
   const { register, handleSubmit, formState: { errors } } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: { deliveryName: user?.name ?? "" },
@@ -45,7 +51,10 @@ export function CheckoutForm({ onBack, onRequireSignIn, onSuccess }: CheckoutFor
     paymentFailed.current = false;
     let attemptedOrderId = activeOrderId;
     try {
-      const orderId = activeOrderId ?? (await createOrder(cartItems, data)).orderId;
+      const orderId = activeOrderId ?? (await createOrder(cartItems, {
+        ...data,
+        scheduledFor: scheduled ? scheduledFor : undefined,
+      })).orderId;
       attemptedOrderId = orderId;
       setActiveOrderId(orderId);
       const payment = await createPayment(orderId);
@@ -109,9 +118,17 @@ export function CheckoutForm({ onBack, onRequireSignIn, onSuccess }: CheckoutFor
         <label>Full name<input {...register("deliveryName")} placeholder="e.g. Ananya Rao" />{errors.deliveryName && <small className="field-error">{errors.deliveryName.message}</small>}</label>
         <label>Mobile number<input {...register("phone")} inputMode="numeric" maxLength={10} placeholder="10-digit mobile number" />{errors.phone && <small className="field-error">{errors.phone.message}</small>}</label>
         <label>Delivery address<textarea {...register("address")} rows={3} placeholder="House / flat, street, area, city, PIN code" />{errors.address && <small className="field-error">{errors.address.message}</small>}</label>
-        <div className="checkout-total"><span>Total to pay</span><strong>₹{total.toFixed(2)}</strong></div>
+        <label className="schedule-option"><input type="checkbox" checked={scheduled} onChange={(event) => setScheduled(event.target.checked)} /> Schedule this delivery</label>
+        {scheduled && <label>Delivery time<input type="datetime-local" value={scheduledFor} min={new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().slice(0, 16)} onChange={(event) => setScheduledFor(event.target.value)} /></label>}
+        <div className="checkout-breakdown">
+          <span>Subtotal <b>₹{total.toFixed(2)}</b></span>
+          <span>Delivery charge <b>₹{deliveryCharge.toFixed(2)}</b></span>
+          <span>Carrying charge <b>₹{carryingCharge.toFixed(2)}</b></span>
+          <span>GST (5%) <b>₹{gst.toFixed(2)}</b></span>
+        </div>
+        <div className="checkout-total"><span>Total to pay</span><strong>₹{grandTotal.toFixed(2)}</strong></div>
         {notice && <div className="notice error-notice">{notice}</div>}
-        <button className="button pay-button" type="submit" disabled={paying || cartItems.length === 0}><CreditCard size={18} />{paying ? <><LoaderCircle className="spin" size={18} /> Opening secure checkout…</> : <>Pay securely with Razorpay · ₹{total.toFixed(0)}</>}</button>
+        <button className="button pay-button" type="submit" disabled={paying || cartItems.length === 0}><CreditCard size={18} />{paying ? <><LoaderCircle className="spin" size={18} /> Opening secure checkout…</> : <>Pay securely with Razorpay · ₹{grandTotal.toFixed(2)}</>}</button>
         <div className="payment-trust"><ShieldCheck size={16} /> Payments are encrypted and verified securely</div>
       </form>
     </section>

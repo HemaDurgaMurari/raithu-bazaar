@@ -1,0 +1,6 @@
+app.payment.razorpay-key-id=rzp_test_replace_with_your_key_id
+app.payment.razorpay-key-secret=replace_with_your_key_secret
+app.payment.webhook-secret=
+spring.mail.username=your-gmail-address@gmail.com
+spring.mail.password=your-16-character-gmail-app-password
+app.mail.from=your-gmail-address@gmail.com

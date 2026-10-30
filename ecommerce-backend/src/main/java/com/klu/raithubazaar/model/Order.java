@@ -29,6 +29,7 @@ public class Order {
     private String address;
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
+    private LocalDateTime scheduledFor;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 
@@ -51,6 +52,8 @@ public class Order {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getExpiresAt() { return expiresAt; }
     public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
+    public LocalDateTime getScheduledFor() { return scheduledFor; }
+    public void setScheduledFor(LocalDateTime scheduledFor) { this.scheduledFor = scheduledFor; }
     public List<OrderItem> getItems() { return items; }
     public void addItem(OrderItem item) { items.add(item); item.setOrder(this); }
 }

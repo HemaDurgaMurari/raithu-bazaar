@@ -12,12 +12,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.List;
 
 @Service
 public class OrderService {
+    private static final BigDecimal DELIVERY_CHARGE = new BigDecimal("49.00");
+    private static final BigDecimal CARRYING_CHARGE = new BigDecimal("2.00");
+    private static final BigDecimal GST_RATE = new BigDecimal("0.05");
     private final UserRepository users;
     private final ProductRepository products;
     private final OrderRepository orders;
@@ -44,6 +49,13 @@ public class OrderService {
         order.setDeliveryName(request.deliveryName().trim());
         order.setPhone(request.phone());
         order.setAddress(request.address().trim());
+        if (request.scheduledFor() != null) {
+            if (request.scheduledFor().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Scheduled delivery must be at least 2 hours from now");
+            }
+            order.setScheduledFor(request.scheduledFor());
+        }
         order.setExpiresAt(LocalDateTime.now().plusMinutes(30));
         BigDecimal total = BigDecimal.ZERO;
         Map<Long, Integer> quantities = new LinkedHashMap<>();
@@ -51,7 +63,11 @@ public class OrderService {
             if (line.productId() == null || line.quantity() == null || line.quantity() < 1 || line.quantity() > 100) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Each cart quantity must be between 1 and 100");
             }
-            int totalQuantity = quantities.merge(line.productId(), line.quantity(), Integer::sum);
+            long productId = line.productId();
+            int quantity = line.quantity();
+            Integer existingQuantity = quantities.get(productId);
+            int totalQuantity = existingQuantity == null ? quantity : existingQuantity + quantity;
+            quantities.put(productId, totalQuantity);
             if (totalQuantity > 100) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Each product quantity cannot exceed 100");
             }
@@ -69,7 +85,17 @@ public class OrderService {
             product.setStatus(product.getStock() > 0 ? "AVAILABLE" : "OUT_OF_STOCK");
             order.addItem(new OrderItem(product, line.getValue(), unitPrice));
         }
-        order.setTotalAmount(total);
+        BigDecimal gst = total.multiply(GST_RATE).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal grandTotal = total.add(DELIVERY_CHARGE).add(CARRYING_CHARGE).add(gst)
+                .setScale(2, RoundingMode.HALF_UP);
+        order.setTotalAmount(grandTotal);
         return orders.save(order);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Order> myOrders(String email) {
+        User user = users.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account not found"));
+        return orders.findAllByUserUserIdOrderByCreatedAtDesc(user.getUserId());
     }
 }

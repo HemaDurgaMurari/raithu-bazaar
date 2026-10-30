@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Raithu Bazaar Backend",
+      "request": "launch",
+      "mainClass": "com.klu.raithubazaar.RaithuBazaarApplication",
+      "projectName": "raithu-bazaar-backend",
+      "cwd": "${workspaceFolder}/ecommerce-backend",
+      "preLaunchTask": "backend: compile"
+    }
+  ]
+}

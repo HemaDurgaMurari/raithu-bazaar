@@ -1,0 +1,49 @@
+{
+  "properties": [
+    {
+      "name": "app.jwt.secret",
+      "type": "java.lang.String",
+      "description": "Secret used to sign JWT access tokens."
+    },
+    {
+      "name": "app.jwt.expiration-ms",
+      "type": "java.lang.Long",
+      "description": "JWT access token lifetime in milliseconds."
+    },
+    {
+      "name": "app.frontend-origin",
+      "type": "java.lang.String",
+      "description": "Allowed frontend origin for CORS and WebSocket connections."
+    },
+    {
+      "name": "app.frontend-url",
+      "type": "java.lang.String",
+      "description": "Public frontend URL used in links embedded in emails."
+    },
+    {
+      "name": "app.mail.from",
+      "type": "java.lang.String",
+      "description": "Sender address used for application emails."
+    },
+    {
+      "name": "app.mail.support",
+      "type": "java.lang.String",
+      "description": "Support address used for complaint and customer support emails."
+    },
+    {
+      "name": "app.payment.razorpay-key-id",
+      "type": "java.lang.String",
+      "description": "Razorpay public key ID."
+    },
+    {
+      "name": "app.payment.razorpay-key-secret",
+      "type": "java.lang.String",
+      "description": "Razorpay private key secret."
+    },
+    {
+      "name": "app.payment.webhook-secret",
+      "type": "java.lang.String",
+      "description": "Secret used to validate Razorpay webhook signatures."
+    }
+  ]
+}

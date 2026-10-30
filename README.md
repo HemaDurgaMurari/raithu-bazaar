@@ -27,6 +27,13 @@ A full-stack, local-first grocery marketplace for fresh vegetables, fruit, snack
    .\mvnw.cmd spring-boot:run
    ```
 
+   For local development, the AI meal planner can use free Ollama. For a deployed site, configure the hosted free-model option with backend secrets as described in [AI meal planner setup](./HOW_TO_RUN_AND_CONFIGURE.md#use-a-hosted-free-model-after-deployment).
+
+   Razorpay keys can also be stored in a local backend file. From
+   `ecommerce-backend`, copy `application-local.properties.example` to
+   `application-local.properties`, add the keys there, and start the backend
+   normally with `.\mvnw.cmd spring-boot:run`. The local file is ignored by Git.
+
    **Where to configure the keys:** get the values from the [Razorpay Dashboard](https://dashboard.razorpay.com/) in **Test Mode → Account & Settings → API Keys → Generate Test Key**, then replace the example strings in the two `$env:` commands above with your Test Key ID and Key Secret. Run those commands in the PowerShell terminal opened in `ecommerce-backend`, before starting Spring Boot.
 
    The backend reads these variables through `ecommerce-backend/src/main/resources/application.properties`, where the existing lines `app.payment.razorpay-key-id=${RAZORPAY_KEY_ID:}` and `app.payment.razorpay-key-secret=${RAZORPAY_KEY_SECRET:}` connect them to Razorpay. **Do not paste your actual credentials into `application.properties`**—keep the placeholders unchanged and supply the values using the terminal commands. Never put the Key Secret in `ecommerce-frontend/.env`, frontend source code, or any `VITE_` variable. If the backend is already running, stop it with Ctrl+C and restart it from the terminal where you set the keys. Without both keys, browsing works but checkout cannot start.
@@ -43,6 +50,10 @@ A full-stack, local-first grocery marketplace for fresh vegetables, fruit, snack
 
 4. Open `http://localhost:5173`. Sign up as a seller to manage the sample products, or as a customer to shop.
 5. Before checkout, follow the [Razorpay Test Mode setup and success/failure guide](./HOW_TO_RUN_AND_CONFIGURE.md#connect-razorpay-test-mode-step-by-step) to test successful and failed payments. Razorpay and SMTP are optional until you use payment/email.
+
+## Deployment
+
+The repository includes a Docker Compose setup for the frontend, Spring backend, and PostgreSQL. Follow [Docker Compose deployment](./HOW_TO_RUN_AND_CONFIGURE.md#deploy-the-full-stack-with-docker-compose) and configure the hosted AI key only in the backend environment. Public deployment requires a Docker-capable host and HTTPS configuration.
 
 PowerShell uses `npm.cmd` here because Windows execution policy can block `npm.ps1`.
 

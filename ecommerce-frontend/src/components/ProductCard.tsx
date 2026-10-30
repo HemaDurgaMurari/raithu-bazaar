@@ -11,6 +11,21 @@ interface ProductCardProps {
   isSeller?: boolean;
 }
 
+function productImage(product: Product) {
+  if (product.imageUrl?.trim()) return product.imageUrl;
+  const name = product.productName.toLowerCase();
+  const category = product.category.toLowerCase();
+  if (name.includes("tomato")) return "https://images.unsplash.com/photo-1546470427-e5ac89b0b4ed?auto=format&fit=crop&w=900&q=85";
+  if (name.includes("banana")) return "https://images.unsplash.com/photo-1528825871115-3581a5387919?auto=format&fit=crop&w=900&q=85";
+  if (name.includes("mango")) return "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=900&q=85";
+  if (name.includes("spinach") || name.includes("leaf")) return "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=900&q=85";
+  if (name.includes("milk")) return "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=900&q=85";
+  if (category === "fruits") return "https://images.unsplash.com/photo-1619566636858-adf3ef4640b1?auto=format&fit=crop&w=900&q=85";
+  if (category === "dairy") return "https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=900&q=85";
+  if (category === "snacks") return "https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=900&q=85";
+  return "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=85";
+}
+
 export function ProductCard({ product, isSeller = false }: ProductCardProps) {
   const addToCart = useCartStore((state) => state.addToCart);
   const queryClient = useQueryClient();
@@ -70,11 +85,14 @@ export function ProductCard({ product, isSeller = false }: ProductCardProps) {
     );
   }
 
-  const image = product.imageUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=80";
+  const image = productImage(product);
   return (
     <article className="product-card">
       <div className="product-image-wrap">
-        <img src={image} alt={product.productName} loading="lazy" />
+        <img src={image} alt={product.productName} loading="lazy" onError={(event) => {
+          event.currentTarget.onerror = null;
+          event.currentTarget.src = "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=85";
+        }} />
         <span className="product-category">{product.category}</span>
         <button className="favorite-button" aria-label={`Save ${product.productName}`}><Heart size={17} /></button>
       </div>

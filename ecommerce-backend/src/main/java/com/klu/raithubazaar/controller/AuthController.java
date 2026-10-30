@@ -4,7 +4,10 @@ import com.klu.raithubazaar.dto.AuthRequest;
 import com.klu.raithubazaar.dto.AuthResponse;
 import com.klu.raithubazaar.model.Role;
 import com.klu.raithubazaar.service.AuthService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")

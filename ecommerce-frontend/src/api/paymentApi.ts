@@ -5,6 +5,7 @@ export interface DeliveryDetails {
   deliveryName: string;
   phone: string;
   address: string;
+  scheduledFor?: string;
 }
 
 export interface CreatedOrder {

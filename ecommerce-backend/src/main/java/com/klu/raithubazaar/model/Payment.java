@@ -39,4 +39,5 @@ public class Payment {
     public void setAmount(BigDecimal amount) { this.amount = amount; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }

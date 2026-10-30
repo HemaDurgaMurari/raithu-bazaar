@@ -45,6 +45,47 @@ $env:FRONTEND_ORIGIN = "http://localhost:5173"
 
 Keep this terminal running. Expected startup is `Started RaithuBazaarApplication`; the API is at `http://localhost:8080`. The project includes safe local defaults, but set your actual database password as shown. Environment variables set in one terminal do not carry over to another.
 
+### Enable the free local AI meal planner
+
+1. Install [Ollama for Windows](https://ollama.com/download/windows), then open Ollama once so its local service starts.
+2. In PowerShell, download the local model (about 2.5 GB):
+
+   ```powershell
+   ollama pull qwen3:4b
+   ```
+
+3. Start the backend as above. It connects to Ollama at `http://localhost:11434`; no API key or paid API credits are needed. If Ollama is installed elsewhere, set `OLLAMA_URL` in the backend terminal before starting it.
+4. On the shop page, enter a dish and number of servings in “What are you cooking?” The model suggests vegetables and quantities, then the app links them to matching in-stock catalog items that customers can add to the cart.
+
+The model runs on your computer. Response speed depends on the available memory and hardware; the first response may take longer while the model loads.
+
+### Use a hosted free model after deployment
+
+If visitors need AI suggestions while your computer is off, choose the hosted option instead of local Ollama:
+
+1. Create an account and API key at [OpenRouter](https://openrouter.ai/keys). Its free models currently allow up to 50 requests per day and 20 per minute; provider availability and limits can change. This is suitable for a small demo, not guaranteed production capacity.
+2. In your deployment host's **backend environment variables / secrets**, set `AI_PROVIDER` to `openrouter` and `OPENROUTER_API_KEY` to the new key. Do not put the key in the frontend, repository, or chat.
+3. Redeploy/restart the backend. The default model is `openrouter/free`, which routes requests to an available free model. No paid credits are needed for the free model route.
+
+Free hosted models may change and can be rate-limited. Add application-level abuse controls before sharing the site widely. Never use the OpenAI key that was pasted into chat; revoke it.
+
+### Deploy the full stack with Docker Compose
+
+The repository includes a Compose setup for the React site, Spring backend, and persistent PostgreSQL database. It can run on a VPS or a deployment host that supports Docker Compose. The host itself may have a fee; the free model allowance does not pay for hosting.
+
+1. Install Docker Engine with the Compose plugin on the host.
+2. Copy `.env.example` to `.env`. Replace `DATABASE_PASSWORD` and `JWT_SECRET` with long random values. For hosted AI, add your new OpenRouter key to `OPENROUTER_API_KEY`; keep `.env` private and out of Git.
+3. Set `FRONTEND_ORIGIN` and `FRONTEND_URL` to the public site origin, including `https://` once TLS is configured. Keep `AI_PROVIDER=openrouter` for hosted inference.
+4. From the project root, run:
+
+   ```sh
+   docker compose up --build -d
+   ```
+
+5. The frontend listens on port 3000 by default. Put HTTPS/TLS in front of it before sharing the site publicly. PostgreSQL data is stored in the `postgres_data` volume.
+
+The Compose file is a portable starting point. A cloud host may require its own database, networking, health checks, or secret settings; use the same environment variable names in that host's backend service configuration. Checkout also needs Razorpay Test or Live credentials, separately from the AI setup.
+
 ### Connect Razorpay Test Mode (step by step)
 
 1. Sign in to the [Razorpay Dashboard](https://dashboard.razorpay.com/) and switch the dashboard to **Test Mode**. Test Mode is separate from Live Mode and does not collect real money.

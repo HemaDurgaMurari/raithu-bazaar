@@ -1,4 +1,4 @@
-export type Role = "SELLER" | "CUSTOMER";
+export type Role = "SELLER" | "CUSTOMER" | "ADMIN";
 
 export interface AuthRequest {
   name?: string;

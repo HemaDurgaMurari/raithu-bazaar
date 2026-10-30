@@ -24,8 +24,9 @@ export function BackgroundJobMonitor() {
       if (active) setConnection("Could not load job history");
     });
 
+    const socketBase = API_URL || `${window.location.protocol}//${window.location.host}`;
     const client = new Client({
-      brokerURL: `${API_URL.replace(/^http/, "ws")}/ws-raithu`,
+      brokerURL: `${socketBase.replace(/^http/, "ws")}/ws-raithu`,
       reconnectDelay: 5000,
       connectHeaders: { Authorization: `Bearer ${localStorage.getItem("raithu_token") ?? ""}` },
       onConnect: () => {
