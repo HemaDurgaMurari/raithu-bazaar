@@ -9,10 +9,11 @@ interface NavbarProps {
   page: Page;
   setPage: (page: Page) => void;
   cartCount: number;
+  onOpenCart: () => void;
   onLogout: () => void;
 }
 
-export function Navbar({ user, page, setPage, cartCount, onLogout }: NavbarProps) {
+export function Navbar({ user, page, setPage, cartCount, onOpenCart, onLogout }: NavbarProps) {
   const [location, setLocation] = useState("your doorstep");
   const [locating, setLocating] = useState(false);
 
@@ -57,7 +58,7 @@ export function Navbar({ user, page, setPage, cartCount, onLogout }: NavbarProps
         </nav>
         <div className="nav-actions">
           {user?.role !== "SELLER" && (
-            <button className="cart-nav" onClick={() => setPage("home")} aria-label={`Cart, ${cartCount} items`}>
+            <button className="cart-nav" onClick={onOpenCart} aria-label={`Open cart, ${cartCount} items`} title="View your basket">
               <ShoppingBag size={19} /><span>Basket</span>{cartCount > 0 && <i>{cartCount}</i>}
             </button>
           )}

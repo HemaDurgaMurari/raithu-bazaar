@@ -8,6 +8,7 @@ import { CheckoutForm } from "./components/CheckoutForm";
 import { AuthPage } from "./pages/AuthPage";
 import { SellerDashboard } from "./pages/SellerDashboard";
 import { AccountPage } from "./pages/AccountPage";
+import { SiteFooter } from "./components/SiteFooter";
 import { useAuthStore } from "./store/authStore";
 import { useCartStore } from "./store/cartStore";
 import type { Role } from "./types/auth";
@@ -37,15 +38,24 @@ export default function App() {
     setPage("home");
   }
 
+  function openCart() {
+    setPage("home");
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        document.getElementById("basket")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    });
+  }
+
   if (page === "signin" || page === "signup") {
-    return <AuthPage mode={page} setPage={setPage} onAuthenticated={authenticated} />;
+    return <><AuthPage mode={page} setPage={setPage} onAuthenticated={authenticated} /><SiteFooter /></>;
   }
 
   const sellerCannotBrowseShop = Boolean(user?.role === "SELLER" && page !== "seller");
 
   return (
     <div className="app-shell">
-      <Navbar user={user} page={page} setPage={setPage} cartCount={cartCount} onLogout={signOut} />
+      <Navbar user={user} page={page} setPage={setPage} cartCount={cartCount} onOpenCart={openCart} onLogout={signOut} />
       {page === "seller" || sellerCannotBrowseShop ? (
         user?.role === "SELLER" ? <SellerDashboard /> : <main className="access-denied"><h1>This corner is for our sellers.</h1><p>Sign in with a seller account to manage your products.</p><button className="button" onClick={() => setPage("signin")}>Sign in as seller</button></main>
       ) : page === "account" ? (
@@ -78,9 +88,9 @@ export default function App() {
             <div className="market-browse"><MealPlanner /><ProductList /></div>
             <div className="basket-column"><Cart onCheckout={() => setPage("checkout")} /><div className="basket-promo"><span>🌼</span><div><b>A little goes a long way</b><p>Every basket supports a local farmer and a happier planet.</p></div></div></div>
           </section>
-          <footer className="footer"><div className="footer-brand"><span className="brand-mark"><Leaf size={23} /></span><div><b>raithu bazaar</b><small>GOOD FOOD. GOOD ROOTS.</small></div></div><p>Grown nearby. Shared with love.</p><small>© 2026 Raithu Bazaar · Made for the love of fresh.</small></footer>
         </main>
       )}
+      <SiteFooter />
     </div>
   );
 }
