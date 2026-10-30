@@ -1,7 +1,7 @@
 package com.klu.raithubazaar.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.klu.raithubazaar.dto.MealPlanRequest;
 import com.klu.raithubazaar.dto.MealPlanResponse;
 import com.klu.raithubazaar.repository.ProductRepository;
@@ -24,7 +24,7 @@ import java.util.Set;
 @Service
 public class MealPlannerService {
     private final ProductRepository products;
-    private final ObjectMapper mapper;
+    private final JsonMapper mapper;
     private final RestClient ollamaClient;
     private final RestClient openRouterClient;
     private final String provider;
@@ -32,7 +32,7 @@ public class MealPlannerService {
     private final String openRouterModel;
     private final String openRouterApiKey;
 
-    public MealPlannerService(ProductRepository products, ObjectMapper mapper,
+    public MealPlannerService(ProductRepository products, JsonMapper mapper,
                               @Value("${app.ai.ollama-url:http://localhost:11434}") String ollamaUrl,
                               @Value("${app.ai.provider:ollama}") String provider,
                               @Value("${app.ai.ollama-model:qwen3:4b}") String ollamaModel,
@@ -73,17 +73,17 @@ public class MealPlannerService {
             JsonNode rows = plan.path("ingredients");
             if (rows.isArray()) {
                 for (JsonNode row : rows) {
-                    String name = row.path("name").asText("").trim();
+                    String name = row.path("name").asString("").trim();
                     if (name.isBlank() || name.length() > 80) continue;
-                    String quantity = row.path("quantity").asText("As needed");
-                    String note = row.path("note").asText("");
+                    String quantity = row.path("quantity").asString("As needed");
+                    String note = row.path("note").asString("");
                     List<MealPlanResponse.ProductMatch> matches = findMatches(name);
                     ingredients.add(new MealPlanResponse.Ingredient(name, quantity, note, matches));
                     if (ingredients.size() == 15) break;
                 }
             }
             return new MealPlanResponse(request.dish().trim(), servings,
-                    plan.path("note").asText("Suggested vegetables for your dish."), ingredients);
+                    plan.path("note").asString("Suggested vegetables for your dish."), ingredients);
         } catch (ResourceAccessException e) {
             String message = "openrouter".equalsIgnoreCase(provider)
                     ? "The hosted AI service is temporarily unavailable. Please try again shortly."
@@ -109,7 +109,7 @@ public class MealPlannerService {
                 .body(mapper.createObjectNode().put("model", ollamaModel).put("system", system)
                         .put("prompt", prompt).put("format", "json").put("stream", false).put("think", false))
                 .retrieve().body(JsonNode.class);
-        return response == null ? "" : response.path("response").asText("");
+        return response == null ? "" : response.path("response").asString("");
     }
 
     private String generateWithOpenRouter(String system, String prompt) {
@@ -131,11 +131,11 @@ public class MealPlannerService {
                 .body(body)
                 .retrieve().body(JsonNode.class);
         JsonNode content = response == null ? null : response.path("choices").path(0).path("message").path("content");
-        if (content != null && content.isTextual()) return content.asText();
+        if (content != null && content.isString()) return content.asString();
         if (content != null && content.isArray()) {
             StringBuilder text = new StringBuilder();
             for (JsonNode part : content) {
-                if (part.hasNonNull("text")) text.append(part.path("text").asText());
+                if (part.hasNonNull("text")) text.append(part.path("text").asString());
             }
             return text.toString();
         }
