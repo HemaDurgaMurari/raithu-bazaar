@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ArrowRight, CheckCircle2, ChevronDown, Leaf, ShieldCheck, Truck } from "lucide-react";
 import { Navbar, type Page } from "./components/Navbar";
 import { ProductList } from "./components/ProductList";
-import { MealPlanner } from "./components/MealPlanner";
 import { Cart } from "./components/Cart";
 import { CheckoutForm } from "./components/CheckoutForm";
 import { AuthPage } from "./pages/AuthPage";
@@ -85,7 +84,7 @@ export default function App() {
           </section>
           <section className="promise-strip"><div><span>01</span><Leaf /><b>Picked at peak freshness</b><small>Never sitting on a shelf for days.</small></div><div><span>02</span><Truck /><b>From farm, not far away</b><small>Support the growers in your community.</small></div><div><span>03</span><ShieldCheck /><b>Good food, honest prices</b><small>Clear pricing, happy kitchens.</small></div></section>
           <section className="market-section" id="market">
-            <div className="market-browse"><MealPlanner /><ProductList /></div>
+            <div className="market-browse"><ProductList /></div>
             <div className="basket-column"><Cart onCheckout={() => setPage("checkout")} /><div className="basket-promo"><span>🌼</span><div><b>A little goes a long way</b><p>Every basket supports a local farmer and a happier planet.</p></div></div></div>
           </section>
         </main>

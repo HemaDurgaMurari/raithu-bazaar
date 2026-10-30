@@ -6,14 +6,14 @@ RUN npm ci
 COPY ecommerce-frontend/ ./
 RUN npm run build
 
-FROM maven:3.9.11-eclipse-temurin-21 AS backend-build
+FROM maven:3.9.11-eclipse-temurin-25 AS backend-build
 WORKDIR /backend
 COPY ecommerce-backend/pom.xml ./
 COPY ecommerce-backend/src ./src
 COPY --from=frontend-build /frontend/dist ./src/main/resources/static
 RUN mvn -B clean package -DskipTests
 
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:25-jre
 WORKDIR /app
 RUN useradd --system --uid 10001 appuser
 COPY --from=backend-build /backend/target/raithu-bazaar-backend-1.0.0.jar app.jar

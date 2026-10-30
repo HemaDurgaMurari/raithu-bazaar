@@ -1,6 +1,6 @@
 # Raithu Bazaar
 
-A full-stack, local-first grocery marketplace for fresh vegetables, fruit, snacks, and dairy. Built with Spring Boot 4.1.1 / Java 21, PostgreSQL, React + TypeScript, JWT, Razorpay test checkout, async email jobs, and live STOMP updates.
+A full-stack, local-first grocery marketplace for fresh vegetables, fruit, snacks, and dairy. Built with Spring Boot 4.1.1 / Java 25, PostgreSQL, React + TypeScript, JWT, Razorpay test checkout, async email jobs, and live STOMP updates.
 
 ## What is included
 
@@ -16,7 +16,7 @@ A full-stack, local-first grocery marketplace for fresh vegetables, fruit, snack
 
 ## Quick start (Windows PowerShell)
 
-1. Install Java 21, Node.js 24, and PostgreSQL. Create a PostgreSQL database named `raithu_bazaar`.
+1. Install Java 25, Node.js 24, and PostgreSQL. Create a PostgreSQL database named `raithu_bazaar`.
 2. In a terminal, open `ecommerce-backend` and set database credentials (change the password to yours):
 
    ```powershell
@@ -26,8 +26,6 @@ A full-stack, local-first grocery marketplace for fresh vegetables, fruit, snack
    $env:RAZORPAY_KEY_SECRET = "your_test_key_secret"
    .\mvnw.cmd spring-boot:run
    ```
-
-   For local development, the AI meal planner can use free Ollama. For a deployed site, configure the hosted free-model option with backend secrets as described in [AI meal planner setup](./HOW_TO_RUN_AND_CONFIGURE.md#use-a-hosted-free-model-after-deployment).
 
    Razorpay keys can also be stored in a local backend file. From
    `ecommerce-backend`, copy `application-local.properties.example` to

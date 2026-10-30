@@ -8,10 +8,6 @@ services:
     dockerContext: .
     healthCheckPath: /
     envVars:
-      - key: AI_PROVIDER
-        value: openrouter
-      - key: OPENROUTER_MODEL
-        value: openrouter/free
       - key: DATABASE_URL
         sync: false
       - key: DATABASE_USERNAME

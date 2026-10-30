@@ -38,7 +38,7 @@ public class SecurityConfig {
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/", "/index.html", "/assets/**", "/*.js", "/*.css", "/*.svg", "/*.png", "/*.ico", "/vite.svg").permitAll()
-                        .requestMatchers("/api/auth/**", "/api/meal-planner/**", "/api/payment/webhook", "/ws/**", "/ws-raithu/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/payment/webhook", "/ws/**", "/ws-raithu/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/orders").hasRole("CUSTOMER")
                         .requestMatchers(HttpMethod.GET, "/api/orders/my").hasRole("CUSTOMER")
